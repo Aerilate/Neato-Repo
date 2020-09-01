@@ -1,5 +1,5 @@
-import React, {Component} from 'react';
-import logo from './logo.svg';
+import React, { Component } from 'react';
+import axios from 'axios';
 import './App.css';
 
 
@@ -7,50 +7,49 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      name: '',
-      greeting: ''
+      file: null
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   handleChange(event) {
-    this.setState({ name: event.target.value });
+    this.setState({ file: event.target.files });
   }
 
-  handleSubmit(event) {
-    event.preventDefault();
-    fetch(`/api/greeting?name=${encodeURIComponent(this.state.name)}`)
-      .then(response => response.json())
-      .then(state => this.setState(state));
+  async handleSubmit(e) {
+    e.preventDefault()
+    await this.uploadFile();
+  }
+
+  async uploadFile() {
+    let files = this.state.file;
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+      formData.append(`image[${i}]`, files[i])
+    }
+
+    axios.post('/api', formData, {
+      headers: {
+        'content-type': 'multipart/form-data'
+      }
+    }).then(response => {
+      console.log(response.data)
+    });
   }
 
   render() {
     return <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
         <form onSubmit={this.handleSubmit}>
-            <label htmlFor="name">Enter your name: </label>
-            <input
-              id="name"
-              type="text"
-              value={this.state.name}
-              onChange={this.handleChange}
-            />
-            <button type="submit">Submit</button>
-          </form>
-          <p>{this.state.greeting}</p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+          <input
+            id="file"
+            type="file"
+            multiple name="file"
+            onChange={this.handleChange}
+          />
+          <button type="submit">Upload file</button>
+        </form>
       </header>
     </div>
   }
