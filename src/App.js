@@ -7,14 +7,16 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      file: null
+      filesToUpload: null,
+      displayImage: null
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.showImage = this.showImage.bind(this);
   }
 
   handleChange(event) {
-    this.setState({ file: event.target.files });
+    this.setState({ filesToUpload: event.target.files });
   }
 
   async handleSubmit(e) {
@@ -23,14 +25,15 @@ class App extends Component {
   }
 
   async uploadFile() {
-    let files = this.state.file;
+    let files = this.state.filesToUpload;
     const formData = new FormData();
     for (let i = 0; i < files.length; i++) {
       formData.append(`image[${i}]`, files[i])
     }
 
-    axios.post('/api', formData, {
+    axios.post('/api/uploads', formData, {
       headers: {
+        'userid': '12345678',
         'content-type': 'multipart/form-data'
       }
     }).then(response => {
@@ -38,9 +41,21 @@ class App extends Component {
     });
   }
 
+  showImage() {
+    axios.get('/api/uploads/image', { responseType: 'arraybuffer' })
+      .then((response) => {
+        let image = btoa(
+          new Uint8Array(response.data)
+            .reduce((data, byte) => data + String.fromCharCode(byte), '')
+        );
+        this.setState({displayImage: `data:${response.headers['content-type'].toLowerCase()};base64,${image}`});
+      });
+  }
+
   render() {
     return <div className="App">
       <header className="App-header">
+        {this.state.displayImage ? <img src={this.state.displayImage} alt="displayImage" /> : null}
         <form onSubmit={this.handleSubmit}>
           <input
             id="file"
@@ -48,8 +63,9 @@ class App extends Component {
             multiple name="file"
             onChange={this.handleChange}
           />
-          <button type="submit">Upload file</button>
+          <button type="submit">Upload file(s)</button>
         </form>
+        <button onClick={this.showImage}> show </button>
       </header>
     </div>
   }
