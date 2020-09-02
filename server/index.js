@@ -5,7 +5,11 @@ const multer = require('multer');
 const multerS3 = require('multer-s3');
 const AWS = require('aws-sdk');
 
-const BUCKET_NAME = 'neato-repo';
+require('dotenv').config();
+const BUCKET_NAME = process.env.aws_bucket_name;
+
+
+
 const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(pino);
@@ -19,7 +23,7 @@ const upload = multer({
       cb(null, { fieldName: file.fieldname });
     },
     key: function (req, file, cb) {
-      cb(null, JSON.stringify(req.headers.userid) + '/' + Date.now().toString() + '-' + file.originalname)
+      cb(null, JSON.stringify(req.query.user) + '/' + Date.now().toString() + '-' + file.originalname)
     }
   })
 });
@@ -32,7 +36,7 @@ app.post('/api/uploads', upload.any(), (req, res) => {
 
 
 app.get('/api/uploads', async (req, res) => {
-  const userId = "12345678";
+  const userId = req.query.user;
 
   function listObjects(userId, cb) {
     var params = {
@@ -55,7 +59,7 @@ app.get('/api/uploads', async (req, res) => {
 
 
 app.get('/api/uploads/image', async (req, res) => {
-  let key = '"12345678"/1599061673886-Fireworks.jpeg';
+  const key = req.query.key;
 
   function getObject(key, cb) {
     var params = {
@@ -72,6 +76,29 @@ app.get('/api/uploads/image', async (req, res) => {
   getObject(key, (image) => {
     res.setHeader('Content-Type', 'image/jpeg');
     res.send(image);
+  })
+});
+
+
+
+app.delete('/api/uploads/image', async (req, res) => {
+  const key = req.query.key;
+
+  function getObject(key, cb) {
+    var params = {
+      Bucket: BUCKET_NAME,
+      Key: key
+    }
+
+    s3.deleteObject(params, function (err, data) {
+      if (err) return err;
+      cb();
+    });
+  }
+
+  getObject(key, () => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(JSON.stringify({ message: `files deleted` }));
   })
 });
 
