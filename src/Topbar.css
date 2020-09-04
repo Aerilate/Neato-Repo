@@ -1,0 +1,27 @@
+.Topbar {
+    background-color: #333333;
+    color: white;
+    position: sticky;
+    top: 0;
+  }
+
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+li:not(:last-child) {
+  padding: 0 3vw 0 1vw;
+  float: left;
+}
+
+li:last-child {
+  padding: 0 1vw 0 0;
+  float: right;
+}
+
+li:not(.Title):hover {
+  color: #ff6179;
+}

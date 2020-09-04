@@ -1,0 +1,54 @@
+.Sidebar {
+    text-align: center;
+}
+
+.CloseButton {
+    margin-right: 2vw;
+    text-align: right;
+}
+
+.CloseButton:hover {
+    color: #ff6179;
+}
+
+.SidebarTitle {
+    margin: 4vw 6vw 2vw 6vw;
+    color: #98e298;
+}
+
+form {
+    display: inline-block;
+    margin-top: 8vh;
+}
+
+input {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', 
+    sans-serif;
+    font-size: calc(10px + 2vmin);
+    padding: 6px 14px 6px 14px;
+    width: 80%;
+    border: none;
+    border-radius: 80px;
+    margin-bottom: 4vh;
+}
+
+input:focus {
+    outline: thin dotted; 
+}
+
+.SignupLoginButtons>*:hover {
+    color: #ff6179;
+}
+
+.SignupButton {
+    float: left;
+    margin-left: 30%;
+}
+
+.LoginButton {
+    float: right;
+    margin-right: 30%;
+ }
+ 
+ 

@@ -1,7 +1,41 @@
-.Home {
-    background-color: #867BE0;
+.Main {
+  font-size: calc(10px + 2vmin);
+  display: flex;
+  min-height: 100vh;
 }
-  
+
+.Jumbotron {
+  color: black;
+  padding-left: 75px;
+}
+
+.KanbannerTitle {
+  padding-top: 40px;
+  padding-bottom: 0px;
+  border: 0px;
+  font-size: 100px;
+}
+
+.Jumbotron p {
+  margin-top: -70px;
+  padding-top: 0px;
+  padding-left: 25px;
+  font-size: 40px;
+}
+
+#Lower {
+  float: left;
+  text-align: right;
+  padding-top: 10vh;
+  padding-right: 25vh;
+  font-size: 25px;
+  background-color: #f7e9e7;
+  min-height: 90vh;
+}
+
 img {
-    height: 300px;
+  width: 60%;
+  height:  60%;
+  border: solid black 5px;
+  border-radius: 20px;
 }
