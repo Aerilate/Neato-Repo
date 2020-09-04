@@ -1,7 +1,7 @@
 .Main {
   font-size: calc(10px + 2vmin);
   display: flex;
-  min-height: 100vh;
+  min-height: 90vh;
 }
 
 .Jumbotron {
@@ -21,21 +21,4 @@
   padding-top: 0px;
   padding-left: 25px;
   font-size: 40px;
-}
-
-#Lower {
-  float: left;
-  text-align: right;
-  padding-top: 10vh;
-  padding-right: 25vh;
-  font-size: 25px;
-  background-color: #f7e9e7;
-  min-height: 90vh;
-}
-
-img {
-  width: 60%;
-  height:  60%;
-  border: solid black 5px;
-  border-radius: 20px;
 }

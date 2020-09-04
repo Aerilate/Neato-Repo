@@ -20,7 +20,7 @@ class App extends Component {
   authListener() {
     fire.auth().onAuthStateChanged((user) => {
       if (user) {
-        this.setState({ user });
+        this.setState({ user }, console.log( user));
       } else {
         this.setState({ user: null });
       }
@@ -30,7 +30,7 @@ class App extends Component {
   render() {
     return (
       <div className="Page">
-        {this.state.user ? <Dashboard userId={this.state.user.uid} /> : <Home />}
+        {this.state.user ? <Dashboard userID={this.state.user.uid} /> : <Home />}
       </div>
     );
   }

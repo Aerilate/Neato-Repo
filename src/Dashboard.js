@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
+import Topbar from './Topbar';
 import axios from 'axios';
 import './Dashboard.css';
 
 
-class Home extends Component {
+class Dashboard extends Component {
     _isMounted = false;
 
     constructor(props) {
@@ -21,7 +22,7 @@ class Home extends Component {
     }
 
     async getUploadedFiles() {
-        let dbFiles = await axios.get(`/api/uploads?user=${encodeURIComponent(this.props.userId)}`)
+        let dbFiles = await axios.get(`/api/uploads?user=${encodeURIComponent(this.props.userID)}`)
             .then((response) => {
                 return response.data;
             });
@@ -49,7 +50,14 @@ class Home extends Component {
     async componentDidMount() {
         this._isMounted = true;
 
-        if (this.props.userId) {
+        if (this.props.userID) {
+            this.getUploadedFiles();
+            this.getPublicFiles();
+        }
+    }
+
+    async componentDidUpdate(prevProps, prevState) {
+        if (this.props.userID && prevProps.userID !== this.props.userID) {
             this.getUploadedFiles();
             this.getPublicFiles();
         }
@@ -76,7 +84,7 @@ class Home extends Component {
                 formData.append(`image[${i}]`, files[i])
             }
 
-            axios.post(`/api/uploads?user=${encodeURIComponent(this.props.userId)}`, formData, {
+            axios.post(`/api/uploads?user=${encodeURIComponent(this.props.userID)}`, formData, {
                 headers: {
                     'content-type': 'multipart/form-data'
                 }
@@ -117,15 +125,20 @@ class Home extends Component {
     }
 
     formatUploadedFiles(stateArr, arr) {
+        console.log(stateArr);
         stateArr.forEach((f) => {
             arr.push(
-                <div className="File" key={f.key}>
-                    <p>{f.key.substring(f.key.indexOf('-') + 1)}</p>
-                    <p onClick={() => { this.updateImagePermission(f.key, true) }}> public </p>
-                    <p onClick={() => { this.updateImagePermission(f.key, false) }}> private </p>
+                <li className="File" key={f.key}>
+                    <h3>{f.key.substring(f.key.indexOf('-') + 1)}</h3>
                     <p onClick={() => { this.showImage(f.key) }}> show </p>
-                    <p onClick={() => { this.deleteFile(f.key) }}> delete </p>
-                </div>)
+                    {this.props.userID === f.user
+                        ? <div>
+                            <p onClick={() => { this.updateImagePermission(f.key, true) }}> public </p>
+                            <p onClick={() => { this.updateImagePermission(f.key, false) }}> private </p>
+                            <p onClick={() => { this.deleteFile(f.key) }}> delete </p>
+                        </div>
+                        : null}
+                </li>)
         });
     }
 
@@ -136,24 +149,40 @@ class Home extends Component {
         let displayPublicFiles = [];
         this.formatUploadedFiles(this.state.filesPublic, displayPublicFiles);
 
-        return <div className="Home">
-            {this.state.displayImage ? <img src={this.state.displayImage} alt="displayImage" /> : null}
-            <form onSubmit={this.handleSubmit}>
-                <input
-                    id="file"
-                    type="file"
-                    multiple name="file"
-                    onChange={this.handleChange}
-                />
-                <button type="submit">Upload file(s)</button>
-            </form>
+        return <div className="Dashboard">
+            <Topbar page="Dashboard" />
 
-            <div>
-                {displayUploadedFiles}
-                {displayPublicFiles}
+            {this.state.displayImage ? <img src={this.state.displayImage} alt="displayImage" /> : null}
+
+            <div id="Upload">
+                <form onSubmit={this.handleSubmit}>
+                    <input
+                        id="file"
+                        type="file"
+                        multiple name="file"
+                        onChange={this.handleChange}
+                    />
+                    <button type="submit">Upload file(s)</button>
+                </form>
+            </div>
+
+            <div id='Table'>
+                <div className='Column'>
+                    <h2>Private Images</h2>
+                    <ul>
+                        {displayUploadedFiles}
+                    </ul>
+                </div>
+
+                <div className='Column'>
+                    <h2>Public Images</h2>
+                    <ul>
+                        {displayPublicFiles}
+                    </ul>
+                </div>
             </div>
         </div>
     }
 }
 
-export default Home;
+export default Dashboard;

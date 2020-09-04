@@ -1,6 +1,6 @@
 .Topbar {
     background-color: #333333;
-    color: white;
+    color: #F1FAEE;
     position: sticky;
     top: 0;
   }
@@ -12,16 +12,16 @@ ul {
     overflow: hidden;
 }
 
-li:not(:last-child) {
+#Title {
   padding: 0 3vw 0 1vw;
   float: left;
 }
 
-li:last-child {
+#TopbarOptions > li:not(#Title) {
   padding: 0 1vw 0 0;
   float: right;
 }
 
-li:not(.Title):hover {
+#TopbarOptions > li:not(#Title):hover {
   color: #ff6179;
 }

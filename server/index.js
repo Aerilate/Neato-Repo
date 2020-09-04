@@ -121,7 +121,7 @@ app.delete('/api/uploads/image', async (req, res) => {
 app.patch('/api/uploads/image', async (req, res) => {
   const key = req.query.key;
   const access = req.query.access;
-  await updateImageDocAccess(await MONGO_CLIENT, key, access)
+  await updateImageDocAccess(await MONGO_CLIENT, key, access === "true")
   
   res.setHeader('Content-Type', 'application/json');
   res.send(JSON.stringify({ message: 'access updated' }));
