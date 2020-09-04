@@ -12,8 +12,8 @@ class Dashboard extends Component {
         this.state = {
             filesToUpload: null,
             displayImage: null,
-            filesUploaded: [],
-            filesPublic: []
+            personalFiles: [],
+            publicFiles: []
         };
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -21,51 +21,26 @@ class Dashboard extends Component {
         this.deleteFile = this.deleteFile.bind(this);
     }
 
-    async getUploadedFiles() {
-        let dbFiles = await axios.get(`/api/uploads?user=${encodeURIComponent(this.props.userID)}`)
-            .then((response) => {
-                return response.data;
-            });
-
-        if (this._isMounted) {
-            this.setState({
-                filesUploaded: dbFiles
-            });
-        }
-    }
-
-    async getPublicFiles() {
-        let dbFiles = await axios.get('/api/uploads/public')
-            .then((response) => {
-                return response.data;
-            });
-
-        if (this._isMounted) {
-            this.setState({
-                filesPublic: dbFiles
-            });
-        }
-    }
 
     async componentDidMount() {
         this._isMounted = true;
 
         if (this.props.userID) {
-            this.getUploadedFiles();
-            this.getPublicFiles();
+            this.getUpdatedFiles()
         }
     }
 
     async componentDidUpdate(prevProps, prevState) {
         if (this.props.userID && prevProps.userID !== this.props.userID) {
-            this.getUploadedFiles();
-            this.getPublicFiles();
+            this.getUpdatedFiles()
         }
     }
 
     componentWillUnmount() {
         this._isMounted = false;
     }
+
+
 
     handleChange(event) {
         this.setState({ filesToUpload: event.target.files });
@@ -75,6 +50,8 @@ class Dashboard extends Component {
         e.preventDefault()
         await this.uploadFile();
     }
+
+
 
     async uploadFile() {
         if (this.state.filesToUpload) {
@@ -88,16 +65,45 @@ class Dashboard extends Component {
                 headers: {
                     'content-type': 'multipart/form-data'
                 }
-            }).then(response => {
-                console.log(response.data)
-                this.getUploadedFiles();
-                this.getPublicFiles();
+            }).then(() => {
+                this.getUpdatedFiles()
             });
         }
     }
 
+    async getPersonalFiles() {
+        let dbFiles = await axios.get(`/api/uploads/users/${encodeURIComponent(this.props.userID)}`)
+            .then((response) => {
+                return response.data;
+            });
+
+        if (this._isMounted) {
+            this.setState({
+                personalFiles: dbFiles
+            });
+        }
+    }
+
+    async getPublicFiles() {
+        let dbFiles = await axios.get('/api/uploads/public')
+            .then((response) => {
+                return response.data;
+            });
+
+        if (this._isMounted) {
+            this.setState({
+                publicFiles: dbFiles
+            });
+        }
+    }
+
+    async getUpdatedFiles() {
+        this.getPersonalFiles();
+        this.getPublicFiles();
+    }
+
     showImage(fileName) {
-        axios.get(`/api/uploads/image?key=${encodeURIComponent(fileName)}`, { responseType: 'arraybuffer' })
+        axios.get(`/api/uploads?key=${encodeURIComponent(fileName)}`, { responseType: 'arraybuffer' })
             .then((response) => {
                 let image = btoa(
                     new Uint8Array(response.data)
@@ -107,34 +113,34 @@ class Dashboard extends Component {
             });
     }
 
-    deleteFile(fileName) {
-        axios.delete(`/api/uploads/image?key=${encodeURIComponent(fileName)}`).then(response => {
-            console.log(response.data)
-            this.getUploadedFiles();
-            this.getPublicFiles();
-        });
+    updateFilePermission(fileName, bool) {
+        const payload = { permission: bool};
+        axios.patch(`/api/uploads?key=${encodeURIComponent(fileName)}`, payload)
+            .then(() => {
+                this.getUpdatedFiles()
+            });
     }
-
-    updateImagePermission(fileName, bool) {
-        axios.patch(`/api/uploads/image?key=${encodeURIComponent(fileName)}&access=${bool}`)
-            .then((response) => {
-                console.log(response.data)
-                this.getUploadedFiles();
-                this.getPublicFiles();
+  
+    deleteFile(fileName) {
+        axios.delete(`/api/uploads?key=${encodeURIComponent(fileName)}`)
+            .then(() => {
+                this.getUpdatedFiles()
             });
     }
 
+
+
     formatUploadedFiles(stateArr, arr) {
-        console.log(stateArr);
         stateArr.forEach((f) => {
             arr.push(
                 <li className="File" key={f.key}>
                     <h3>{f.key.substring(f.key.indexOf('-') + 1)}</h3>
+
                     <p onClick={() => { this.showImage(f.key) }}> show </p>
                     {this.props.userID === f.user
                         ? <div>
-                            <p onClick={() => { this.updateImagePermission(f.key, true) }}> public </p>
-                            <p onClick={() => { this.updateImagePermission(f.key, false) }}> private </p>
+                            <p onClick={() => { this.updateFilePermission(f.key, true) }}> public </p>
+                            <p onClick={() => { this.updateFilePermission(f.key, false) }}> private </p>
                             <p onClick={() => { this.deleteFile(f.key) }}> delete </p>
                         </div>
                         : null}
@@ -143,11 +149,11 @@ class Dashboard extends Component {
     }
 
     render() {
-        let displayUploadedFiles = [];
-        this.formatUploadedFiles(this.state.filesUploaded, displayUploadedFiles);
+        let displayPersonalFiles = [];
+        this.formatUploadedFiles(this.state.personalFiles, displayPersonalFiles);
 
         let displayPublicFiles = [];
-        this.formatUploadedFiles(this.state.filesPublic, displayPublicFiles);
+        this.formatUploadedFiles(this.state.publicFiles, displayPublicFiles);
 
         return <div className="Dashboard">
             <Topbar page="Dashboard" />
@@ -168,9 +174,9 @@ class Dashboard extends Component {
 
             <div id='Table'>
                 <div className='Column'>
-                    <h2>Private Images</h2>
+                    <h2>Personal Images</h2>
                     <ul>
-                        {displayUploadedFiles}
+                        {displayPersonalFiles}
                     </ul>
                 </div>
 
@@ -184,5 +190,6 @@ class Dashboard extends Component {
         </div>
     }
 }
+
 
 export default Dashboard;

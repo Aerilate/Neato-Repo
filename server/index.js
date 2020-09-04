@@ -20,7 +20,8 @@ const BUCKET_NAME = process.env.aws_bucket_name;
 const MONGO_CLIENT = connectToDB()
 
 const app = express();
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json())
 app.use(pino);
 
 const s3 = new AWS.S3({ apiVersion: '2006-03-01' });
@@ -37,6 +38,7 @@ const upload = multer({
   })
 });
 
+
 app.post('/api/uploads', upload.any(), async (req, res) => {
   const userId = req.query.user;
   for (const obj of req.files) {
@@ -48,7 +50,6 @@ app.post('/api/uploads', upload.any(), async (req, res) => {
 });
 
 
-
 app.get('/api/uploads/public', async (req, res) => {
   const files = await getPublicImageDocs(await MONGO_CLIENT);
   delete files.id;
@@ -58,9 +59,8 @@ app.get('/api/uploads/public', async (req, res) => {
 });
 
 
-
-app.get('/api/uploads', async (req, res) => {
-  const user = req.query.user;
+app.get('/api/uploads/users/:userID', async (req, res) => {
+  const user = req.params.userID;
   const files = await getPersonalImageDocs(await MONGO_CLIENT, user);
   delete files.id;
 
@@ -69,8 +69,7 @@ app.get('/api/uploads', async (req, res) => {
 });
 
 
-
-app.get('/api/uploads/image', async (req, res) => {
+app.get('/api/uploads', async (req, res) => {
   const key = req.query.key;
 
   function getObject(key, cb) {
@@ -92,8 +91,17 @@ app.get('/api/uploads/image', async (req, res) => {
 });
 
 
+app.patch('/api/uploads', async (req, res) => {
+  const key = req.query.key;
+  const newPermission = await req.body.permission;
+  await updateImageDocAccess(await MONGO_CLIENT, key, await newPermission)
+  
+  res.setHeader('Content-Type', 'application/json');
+  res.send(JSON.stringify({ message: 'permission updated' }));
+});
 
-app.delete('/api/uploads/image', async (req, res) => {
+
+app.delete('/api/uploads', async (req, res) => {
   const key = req.query.key;
 
   function getObject(key, cb) {
@@ -115,18 +123,6 @@ app.delete('/api/uploads/image', async (req, res) => {
     res.send(JSON.stringify({ message: `files deleted` }));
   })
 });
-
-
-
-app.patch('/api/uploads/image', async (req, res) => {
-  const key = req.query.key;
-  const access = req.query.access;
-  await updateImageDocAccess(await MONGO_CLIENT, key, access === "true")
-  
-  res.setHeader('Content-Type', 'application/json');
-  res.send(JSON.stringify({ message: 'access updated' }));
-});
-
 
 
 app.listen(3001, () =>
