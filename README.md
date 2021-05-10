@@ -1,4 +1,4 @@
-# :camera: Neato Repo :camera:
+# :cd: Neato Repo :cd:
 - [Description](#description)
 - [Features](#features)
 - [Instructions](#instructions)
