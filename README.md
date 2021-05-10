@@ -30,7 +30,7 @@ The logged-in user can set an image permission to public:
 ![Public Images](/screenshots/PublicImages.png)\
 &nbsp;
 
-Public images can be seen from any other account:
+Public images can be seen from any other account. Here, the logged-in user B can see user A's public images:
 
 ![Another Account](/screenshots/AnotherAccount.png)\
 &nbsp;
